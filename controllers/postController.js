@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { posts } from "../db/schema.js";
 import { deleteImages } from "../services/uploadService.js";
@@ -63,7 +63,8 @@ export const getAllActivePosts = async (req, res) => {
         featuredImage: posts.featuredImage,
       })
       .from(posts)
-      .where(eq(posts.active, true));
+      .where(eq(posts.active, true))
+      .orderBy(desc(posts.createdAt));
 
     res.status(200).json(allActivePosts);
   } catch (err) {

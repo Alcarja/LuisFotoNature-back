@@ -49,3 +49,23 @@ export const posts = pgTable(
     }),
   ],
 );
+
+export const comments = pgTable(
+  "comments",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id").notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    content: text("content").notNull(),
+    approved: boolean().default(false).notNull(),
+
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.postId],
+      foreignColumns: [posts.id],
+    }),
+  ],
+);

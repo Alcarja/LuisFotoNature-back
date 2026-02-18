@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { comments, posts } from "../db/schema.js";
 import { notifyNewComment } from "../services/email.js";
@@ -61,6 +61,29 @@ export const getCommentsByPostId = async (req, res) => {
       .where(eq(comments.postId, parseInt(postId)));
 
     res.status(200).json(postComments);
+  } catch (err) {
+    console.error("Get comments error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getAllComments = async (req, res) => {
+  try {
+    const allComments = await db
+      .select({
+        id: comments.id,
+        postId: comments.postId,
+        email: comments.email,
+        content: comments.content,
+        approved: comments.approved,
+        createdAt: comments.createdAt,
+        postTitle: posts.title,
+      })
+      .from(comments)
+      .leftJoin(posts, eq(comments.postId, posts.id))
+      .orderBy(desc(comments.id));
+
+    res.status(200).json(allComments);
   } catch (err) {
     console.error("Get comments error:", err);
     res.status(500).json({ error: err.message });

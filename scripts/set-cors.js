@@ -13,7 +13,7 @@ const s3 = new S3Client({
 const corsConfig = {
   CORSRules: [
     {
-      AllowedOrigins: ["http://localhost:3000"],
+      AllowedOrigins: ["http://localhost:3000", "http://46.225.161.233"],
       AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
       AllowedHeaders: ["*"],
       ExposeHeaders: ["ETag"],

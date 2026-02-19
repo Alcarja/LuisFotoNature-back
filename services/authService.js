@@ -73,12 +73,25 @@ export async function loginUser({ email, password }, res) {
   };
 }
 
-export async function logoutUser(token) {
+export async function logoutUser(req, res) {
   try {
-    jwt.verify(token, JWT_SECRET);
-    return { success: true, message: "Logged out successfully" };
+    // Sobreescribimos la cookie 'token' con un valor vacío y que expire YA
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0), // Fecha en el pasado (1970)
+      path: "/", // Asegúrate de que el path sea el mismo que al crearla
+      sameSite: "lax",
+      secure: false, // Ponlo en 'true' si usas HTTPS (producción)
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Sesión cerrada correctamente",
+    });
   } catch (error) {
-    throw new Error("Invalid token");
+    return res
+      .status(500)
+      .json({ success: false, message: "Error al cerrar sesión" });
   }
 }
 

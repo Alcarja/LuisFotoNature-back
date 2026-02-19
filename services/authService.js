@@ -52,20 +52,10 @@ export async function loginUser({ email, password }, res) {
   res.cookie("token", token, {
     path: "/",
     httpOnly: true,
-
-    // CURRENT (IP/HTTP): Must be false
-    // PRODUCTION (HTTPS): Must be true
-    secure: hasSSL,
-
-    // CURRENT (IP/HTTP): "lax" allows the cookie to work across ports (3000/4000)
-    // PRODUCTION (HTTPS): "strict" is best, or "lax" if you have separate subdomains
-    sameSite: "lax",
-
-    // Match this to your JWT duration (5 days = 432,000,000 ms)
+    secure: true, // HTTPS is now active
+    sameSite: "strict", // same domain now, strict is fine
     maxAge: 5 * 24 * 60 * 60 * 1000,
-
-    // DO NOT add a 'domain' property for IP addresses.
-    // For production domains, use: domain: ".yourdomain.com"
+    domain: ".luisfotonature.com", // covers both www and non-www
   });
 
   return {

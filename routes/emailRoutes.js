@@ -1,8 +1,13 @@
 import express from "express";
-import { suscribe } from "../controllers/emailController.js";
+import {
+  getAllSuscribers,
+  sendPostCampaignEmail,
+} from "../controllers/emailController.js";
 
 const router = express.Router();
 
-router.post("/suscribe", suscribe);
+router.post("/send-post-campaign/:postId", sendPostCampaignEmail);
+
+router.get("/get-all-subscribers", getAllSuscribers);
 
 export default router;

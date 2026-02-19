@@ -1,37 +1,114 @@
-export const suscribe = async (req, res) => {
+import { eq } from "drizzle-orm";
+import { db } from "../db/client.js";
+import { posts } from "../db/schema.js";
+
+export const sendPostCampaignEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { postId } = req.params;
 
-    const response = await fetch("https://api.brevo.com/v3/contacts", {
-      method: "POST",
-      headers: {
-        "api-key": process.env.BREVO_API_KEY,
-        "Content-Type": "application/json",
+    // 1. Fetch the post
+    const [post] = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.id, parseInt(postId)));
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (post.campaignSent) {
+      return res
+        .status(400)
+        .json({ error: "Campaign already sent for this post" });
+    }
+
+    // 2. Create the campaign
+    const createResponse = await fetch(
+      "https://api.brevo.com/v3/emailCampaigns",
+      {
+        method: "POST",
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `Post ${post.id}`,
+          subject: post.title,
+          sender: {
+            name: "LuisFotoNature",
+            email: process.env.SENDER_EMAIL,
+          },
+          type: "classic",
+          templateId: 8,
+          recipients: {
+            listIds: [6],
+          },
+          params: {
+            postTitle: post.title,
+            postUrl: `http://46.225.161.233/posts/${post.id}`,
+            featuredImage: post.featuredImage,
+          },
+        }),
       },
+    );
 
-      body: JSON.stringify({
-        email,
-        includeListIds: [6], // instead of listIds
-        templateId: 3, // confirmation email template
-        redirectionUrl: "http://46.225.161.233/posts", // clean URL, no extra text
-      }),
-    });
+    const campaignData = await createResponse.json();
 
-    const data = await response.json();
-    console.log("Brevo response:", JSON.stringify(data)); // see what's happening
+    if (!createResponse.ok) {
+      throw new Error(campaignData.message);
+    }
+
+    const campaignId = campaignData.id;
+
+    // 3. Send the campaign
+    const sendResponse = await fetch(
+      `https://api.brevo.com/v3/emailCampaigns/${campaignId}/sendNow`,
+      {
+        method: "POST",
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!sendResponse.ok) {
+      const text = await sendResponse.text(); // use text() not json()
+      throw new Error(text);
+    }
+
+    // 4. Mark campaign as sent
+    await db
+      .update(posts)
+      .set({ campaignSent: true, updatedAt: new Date() })
+      .where(eq(posts.id, parseInt(postId)));
+
+    res.status(200).json({ message: "Campaign sent", campaignId });
+  } catch (err) {
+    console.error("Send campaign error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getAllSuscribers = async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://api.brevo.com/v3/contacts/lists/6/contacts?limit=500",
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
     if (!response.ok) {
       const error = await response.json();
-      // Contact exists but unconfirmed, not a real error
-      if (error.code === "duplicate_parameter") {
-        return res
-          .status(200)
-          .json({ message: "Please check your email to confirm" });
-      }
       throw new Error(error.message);
     }
 
-    res.status(201).json({ email });
+    const data = await response.json();
+    res.status(200).json(data);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

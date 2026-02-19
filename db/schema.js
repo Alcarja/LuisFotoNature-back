@@ -38,6 +38,7 @@ export const posts = pgTable(
     category: varchar("category", { length: 100 }),
     active: boolean().default(false).notNull(),
     slug: varchar("slug", { length: 255 }).unique(),
+    campaignSent: boolean().default(false),
 
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),

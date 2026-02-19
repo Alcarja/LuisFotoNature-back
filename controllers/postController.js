@@ -42,6 +42,7 @@ export const getAllPosts = async (req, res) => {
         createdAt: posts.createdAt,
         category: posts.category,
         active: posts.active,
+        campaignSent: posts.campaignSent,
       })
       .from(posts);
 

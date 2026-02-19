@@ -4,17 +4,11 @@ import {
   SendSmtpEmail,
 } from "@getbrevo/brevo";
 
-console.log("✓ Email service initializing...");
-console.log("BREVO_API_KEY set:", !!process.env.BREVO_API_KEY);
-console.log("SENDER_EMAIL:", process.env.SENDER_EMAIL);
-
 const brevoClient = new TransactionalEmailsApi();
 brevoClient.setApiKey(
   TransactionalEmailsApiApiKeys.apiKey,
   process.env.BREVO_API_KEY,
 );
-
-console.log("✓ Email service ready");
 
 const ADMIN_EMAILS = [
   { email: "jaime.mediano@gmail.com", name: "Jaime" },
@@ -40,7 +34,6 @@ export async function notifyNewComment({
 
   try {
     const response = await brevoClient.sendTransacEmail(message);
-    console.log("✅ Email sent successfully:", response.body);
     return response.body;
   } catch (error) {
     console.error(

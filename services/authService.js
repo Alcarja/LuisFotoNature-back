@@ -50,6 +50,7 @@ export async function loginUser({ email, password }, res) {
   });
 
   res.cookie("token", token, {
+    path: "/",
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "strict" : "lax",

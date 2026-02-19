@@ -38,17 +38,26 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    // 1. Borramos la cookie directamente usando el objeto 'res' que ya tenemos aquí
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+      path: "/",
+      sameSite: "lax",
+      secure: false, // Cámbialo a true si estás en producción con HTTPS
+    });
 
-    if (!token) {
-      return res.status(400).json({ error: "No token provided" });
-    }
-
-    await logoutUser(token);
-
-    res.status(200).json({ message: "Logged out successfully" });
+    // 2. Opcional: Si quieres borrar el header de Authorization en el cliente,
+    // eso se hace en el frontend, pero aquí confirmamos el éxito.
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.status(500).json({
+      success: false,
+      error: "Error al cerrar sesión",
+    });
   }
 };
 

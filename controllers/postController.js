@@ -44,7 +44,8 @@ export const getAllPosts = async (req, res) => {
         active: posts.active,
         campaignSent: posts.campaignSent,
       })
-      .from(posts);
+      .from(posts)
+      .orderBy(desc(posts.createdAt));
 
     res.status(200).json(allPosts);
   } catch (err) {

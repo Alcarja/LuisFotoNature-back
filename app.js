@@ -15,6 +15,7 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
 app.use(cookieParser());
 
 const allowedOrigins = ["http://localhost:3000", "http://46.225.161.233"];

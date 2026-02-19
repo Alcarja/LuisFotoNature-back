@@ -1,8 +1,4 @@
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-} from "../services/authService.js";
+import { registerUser, loginUser } from "../services/authService.js";
 import { db } from "../db/client.js";
 import { users } from "../db/schema.js";
 import { eq } from "drizzle-orm";

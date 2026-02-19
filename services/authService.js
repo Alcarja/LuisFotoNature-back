@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const isProduction = process.env.NODE_ENV === "production";
+const hasSSL = false; // 👈 Set to TRUE only once you have https://domain.com
 
 export async function registerUser({ name, lastName, email, password }) {
   const existing = await db.select().from(users).where(eq(users.email, email));
@@ -52,9 +52,20 @@ export async function loginUser({ email, password }, res) {
   res.cookie("token", token, {
     path: "/",
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
-    maxAge: 15 * 60 * 1000, // 15 minutes
+
+    // CURRENT (IP/HTTP): Must be false
+    // PRODUCTION (HTTPS): Must be true
+    secure: hasSSL,
+
+    // CURRENT (IP/HTTP): "lax" allows the cookie to work across ports (3000/4000)
+    // PRODUCTION (HTTPS): "strict" is best, or "lax" if you have separate subdomains
+    sameSite: "lax",
+
+    // Match this to your JWT duration (5 days = 432,000,000 ms)
+    maxAge: 5 * 24 * 60 * 60 * 1000,
+
+    // DO NOT add a 'domain' property for IP addresses.
+    // For production domains, use: domain: ".yourdomain.com"
   });
 
   return {

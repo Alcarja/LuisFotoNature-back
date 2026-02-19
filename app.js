@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -13,18 +15,36 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000", "http://46.225.161.233:3000"];
+const allowedOrigins = ["http://localhost:3000", process.env.FRONTEND_URL];
 
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
 };
 
+// Rate limiters
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per window
+  message: { error: "Too many attempts, please try again later" },
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Too many requests, please try again later" },
+});
+
+app.use(helmet());
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
+
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api", apiLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);

@@ -1,4 +1,8 @@
-import { registerUser, loginUser, logoutUser } from "../services/authService.js";
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+} from "../services/authService.js";
 import { db } from "../db/client.js";
 import { users } from "../db/schema.js";
 import { eq } from "drizzle-orm";
@@ -14,13 +18,6 @@ export const register = async (req, res) => {
       password,
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 3600000,
-    });
-
     res.status(201).json({ user, token });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -31,14 +28,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { user, token } = await loginUser({ email, password });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 432000000, // 5 days
-    });
+    const { user, token } = await loginUser({ email, password }, res);
 
     res.status(200).json({ user, token });
   } catch (err) {
@@ -56,7 +46,6 @@ export const logout = async (req, res) => {
 
     await logoutUser(token);
 
-    res.clearCookie("token");
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });

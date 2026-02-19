@@ -4,7 +4,8 @@ import { users } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+const isProduction = process.env.NODE_ENV === "production";
 
 export async function registerUser({ name, lastName, email, password }) {
   const existing = await db.select().from(users).where(eq(users.email, email));
@@ -36,7 +37,7 @@ export async function registerUser({ name, lastName, email, password }) {
   return { user, token };
 }
 
-export async function loginUser({ email, password }) {
+export async function loginUser({ email, password }, res) {
   const [user] = await db.select().from(users).where(eq(users.email, email));
 
   if (!user) throw new Error("User not found");
@@ -48,9 +49,15 @@ export async function loginUser({ email, password }) {
     expiresIn: "5d",
   });
 
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  });
+
   return {
     user: { id: user.id, email: user.email, role: user.role },
-    token,
   };
 }
 

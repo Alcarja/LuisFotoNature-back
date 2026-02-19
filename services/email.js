@@ -10,10 +10,7 @@ brevoClient.setApiKey(
   process.env.BREVO_API_KEY,
 );
 
-const ADMIN_EMAILS = [
-  { email: "jaime.mediano@gmail.com", name: "Jaime" },
-  { email: "luisalcarazt@yahoo.es", name: "Luis" },
-];
+const ADMIN_EMAILS = JSON.parse(process.env.ADMIN_EMAILS);
 const SENDER_EMAIL = process.env.SENDER_EMAIL || "noreply@luisfoto.com";
 
 export async function notifyNewComment({

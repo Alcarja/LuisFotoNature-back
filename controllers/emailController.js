@@ -45,7 +45,7 @@ export const sendPostCampaignEmail = async (req, res) => {
           },
           params: {
             postTitle: post.title,
-            postUrl: `http://46.225.161.233/posts/${post.id}`,
+            postUrl: `${process.env.FRONTEND_URL}/posts/${post.id}`,
             featuredImage: post.featuredImage,
           },
         }),

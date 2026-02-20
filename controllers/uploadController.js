@@ -2,7 +2,7 @@ import { generatePresignedUrl, confirmUpload, deleteImages } from "../services/u
 
 export const getPresignedUrl = async (req, res) => {
   try {
-    const { filename, contentType, postId } = req.body;
+    const { filename, contentType, postId, galleryId } = req.body;
 
     if (!filename || !contentType) {
       return res.status(400).json({
@@ -14,7 +14,8 @@ export const getPresignedUrl = async (req, res) => {
     const { presignedUrl, publicUrl } = await generatePresignedUrl(
       filename,
       contentType,
-      postId
+      postId,
+      galleryId
     );
 
     res.status(200).json({
@@ -41,10 +42,10 @@ export const confirmImageUpload = async (req, res) => {
       });
     }
 
-    if (!["featured", "post-body"].includes(context)) {
+    if (!["featured", "post-body", "gallery"].includes(context)) {
       return res.status(400).json({
         success: false,
-        message: 'context must be either "featured" or "post-body"',
+        message: 'context must be "featured", "post-body", or "gallery"',
       });
     }
 

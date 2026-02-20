@@ -10,6 +10,7 @@ import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
+import galleryRoutes from "./routes/galleryRoutes.js";
 
 dotenv.config();
 
@@ -70,5 +71,6 @@ app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/emails", emailRoutes);
+app.use("/api/galleries", galleryRoutes);
 
 export default app;

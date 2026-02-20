@@ -70,3 +70,41 @@ export const comments = pgTable(
     }),
   ],
 );
+
+export const galleries = pgTable(
+  "galleries",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    name: varchar("name", { length: 100 }).notNull(),
+    continent: varchar("continent", { length: 100 }).notNull(),
+    place: varchar("place", { length: 255 }).notNull(),
+    active: boolean().default(false).notNull(),
+
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+    }),
+  ],
+);
+
+export const galleryImages = pgTable(
+  "gallery_images",
+  {
+    id: serial("id").primaryKey(),
+    galleryId: integer("gallery_id").notNull(),
+    imageUrl: varchar("image_url", { length: 500 }).notNull(),
+
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.galleryId],
+      foreignColumns: [galleries.id],
+    }),
+  ],
+);

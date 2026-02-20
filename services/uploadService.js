@@ -16,11 +16,17 @@ const PRESIGN_EXPIRY = 5 * 60; // 5 minutes in seconds
 const BUCKET_NAME = process.env.S3_BUCKET_NAME;
 const PUBLIC_BASE_URL = process.env.S3_PUBLIC_BASE_URL;
 
-export const generatePresignedUrl = async (filename, contentType, postId) => {
+export const generatePresignedUrl = async (filename, contentType, postId, galleryId) => {
   try {
     const uniqueId = crypto.randomBytes(4).toString("hex");
-    // Use post-{postId} as folder if postId provided, otherwise use temp
-    const folderPath = postId ? `photos/post-${postId}` : `photos/temp`;
+    let folderPath;
+    if (galleryId) {
+      folderPath = `galleries/${galleryId}`;
+    } else if (postId) {
+      folderPath = `photos/post-${postId}`;
+    } else {
+      folderPath = `photos/temp`;
+    }
     const key = `${folderPath}/${uniqueId}-${filename}`;
 
     const command = new PutObjectCommand({

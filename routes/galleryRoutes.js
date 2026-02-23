@@ -27,11 +27,20 @@ router.get(
 );
 
 router.get(
+  "/get-gallery-by-id/:galleryId",
+  authMiddleware,
+  adminMiddleware,
+  getGalleryById,
+);
+
+router.get(
   "/get-all-galleries",
   authMiddleware,
   adminMiddleware,
   getAllGalleries,
 );
+
+router.get("/get-all-active-galleries", getAllGalleries);
 
 router.put(
   "/update-gallery/:galleryId",

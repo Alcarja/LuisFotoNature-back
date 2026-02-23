@@ -95,6 +95,28 @@ export const getAllGalleries = async (req, res) => {
   }
 };
 
+export const getAllActiveGalleries = async (req, res) => {
+  try {
+    const allActiveGalleries = await db
+      .select({
+        id: galleries.id,
+        userId: galleries.userId,
+        name: galleries.name,
+        continent: galleries.continent,
+        place: galleries.place,
+        createdAt: galleries.createdAt,
+      })
+      .from(galleries)
+      .where(eq(galleries.active, "active"))
+      .orderBy(desc(galleries.createdAt));
+
+    res.status(200).json(allActiveGalleries);
+  } catch (err) {
+    console.error("Get all active galleries error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const updateGallery = async (req, res) => {
   try {
     const { galleryId } = req.params;
